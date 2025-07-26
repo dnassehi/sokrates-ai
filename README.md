@@ -60,7 +60,8 @@ Sokrates AI er en intelligent samtaleassistent som hjelper pasienter med å fyll
 
 4. **Start applikasjonen**
    ```bash
-   pnpm run docker-compose
+   cd docker
+   docker-compose up --build -d
    ```
 
 5. **Åpne nettleseren**
