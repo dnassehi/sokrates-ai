@@ -1,0 +1,72 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = "postgresql://postgres:postgres@postgres/app" // hardcoded because it's an internal docker connection
+}
+
+model Doctor {
+  id         Int      @id @default(autoincrement())
+  email      String   @unique
+  password   String
+  clinicCode String
+  createdAt  DateTime @default(now())
+  
+  ratings    Rating[]
+}
+
+model Session {
+  id          Int      @id @default(autoincrement())
+  clinicCode  String
+  status      String   @default("active") // active, completed
+  createdAt   DateTime @default(now())
+  completedAt DateTime?
+  
+  messages    Message[]
+  anamnesis   Anamnesis?
+  rating      Rating?
+}
+
+model Message {
+  id        Int      @id @default(autoincrement())
+  sessionId Int
+  role      String   // user, assistant
+  content   String
+  createdAt DateTime @default(now())
+  
+  session   Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+}
+
+model Anamnesis {
+  id                 Int      @id @default(autoincrement())
+  sessionId          Int      @unique
+  hovedplage         String
+  tidligereSykdommer String
+  medisinering       String
+  allergier          String
+  familiehistorie    String
+  sosialLivsstil     String
+  ros                String
+  pasientMaal        String
+  friOppsummering    String
+  createdAt          DateTime @default(now())
+  
+  session            Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+}
+
+model Rating {
+  id        Int      @id @default(autoincrement())
+  sessionId Int      @unique
+  doctorId  Int?
+  score     Int      // 1-5 rating
+  comment   String?
+  createdAt DateTime @default(now())
+  
+  session   Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  doctor    Doctor?  @relation(fields: [doctorId], references: [id])
+}
