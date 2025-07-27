@@ -89,19 +89,11 @@ services:
         condition: service_started
       minio:
         condition: service_started
-    command: >
-      /usr/bin/tini -- bash -c '
-        if [ "$NODE_ENV" = "development" ]; then
-          echo "Running in development mode"
-          PORT=3000 pnpm dev
-        else
-          echo "Running in production mode"
-          PORT=3000 pnpm start
-        fi
-      '
+    environment:
+      - NODE_ENV=production
+    command: ["pnpm", "start"]
     working_dir: /app
     volumes:
-      - ../:/app
       - node-modules-cache:/app/node_modules:nocopy
     tmpfs:
       - /app/.pnpm-store:ro,size=1k

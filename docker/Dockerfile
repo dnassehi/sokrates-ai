@@ -9,23 +9,27 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install --yes wget build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev vim less iputils-ping sudo libsecret-1-0 command-not-found rsync man-db netcat-openbsd dnsutils procps lsof tini && \
     DEBIAN_FRONTEND=noninteractive apt-get update
 
-RUN npm install -g pnpm
+RUN npm install -g pnpm vinxi
 RUN pnpm set store-dir /app/node_modules/.pnpm-store
 
 # Copy package files
 COPY package.json pnpm-lock.yaml ./
 
+# Copy Prisma schema and source code before installing dependencies
+COPY prisma/ ./prisma/
+COPY src/ ./src/
+
 # Install dependencies
 RUN pnpm install --frozen-lockfile
 
-# Copy application source code
+# Copy remaining application files
 COPY . .
 
-# Generate Prisma client and TanStack Router
-RUN pnpm run postinstall
+# Copy .env file for build-time environment variables
+COPY .env .env
 
-# Build the application
-RUN pnpm run build
+# Load environment variables from .env file and build the application
+RUN export $(cat .env | tr -d '\r' | xargs) && pnpm run build
 
 # Expose the port the app runs on
 EXPOSE 3000

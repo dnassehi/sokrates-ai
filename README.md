@@ -53,10 +53,11 @@ Sokrates AI er en intelligent samtaleassistent som hjelper pasienter med å fyll
    ```bash
    cp .env.example .env
    ```
-   
+
    Rediger `.env` og legg til:
    - `OPENAI_API_KEY`: Din OpenAI API-nøkkel
    - `JWT_SECRET`: En lang, tilfeldig streng for JWT-signering (minst 32 tegn)
+   og endre `NODE_ENV` fra `development` til `production`
 
 4. **Start applikasjonen**
    ```bash
@@ -65,7 +66,7 @@ Sokrates AI er en intelligent samtaleassistent som hjelper pasienter med å fyll
    ```
 
 5. **Åpne nettleseren**
-   Gå til `http://localhost:5173` for å se applikasjonen
+   Gå til `http://localhost:8000` for å se applikasjonen
 
 ### Demo-konto
 

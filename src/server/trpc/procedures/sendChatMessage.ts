@@ -9,47 +9,21 @@ const openai = new OpenAI({
   apiKey: env.OPENAI_API_KEY,
 });
 
-const streamingResponseSchema = {
-  type: "object",
-  properties: {
-    content: {
-      type: "string",
-      description: "The content of the streaming response"
-    },
-    type: {
-      type: "string",
-      enum: ["text", "complete"],
-      description: "The type of response chunk"
-    }
-  },
-  required: ["content", "type"]
-};
-
-const SOKRATES_SYSTEM_PROMPT = `Du er Sokrates, en AI-assistent som hjelper pasienter med å fylle ut en medisinsk anamnese gjennom sokratisk dialog. Din oppgave er å stille gjennomtenkte spørsmål for å samle informasjon om følgende områder:
-
-1. Hovedplage - hva er pasientens primære bekymring
-2. Tidligere sykdommer - medisinsk historie
-3. Medisinering - nåværende og tidligere medisiner
-4. Allergier - kjente allergier og reaksjoner
-5. Familiehistorie - arvelige sykdommer i familien
-6. Sosial livsstil - røyking, alkohol, mosjon, etc.
-7. ROS (Review of Systems) - systematisk gjennomgang av organsystemer
-8. Pasientmål - hva håper pasienten å oppnå
-9. Fri oppsummering - andre relevante opplysninger
-
-Stil ett spørsmål om gangen. Vær vennlig, empatisk og profesjonell. Ikke gi medisinske råd. Når du har samlet nok informasjon i alle områdene, avslutt samtalen høflig og takk pasienten.`;
-
 export const sendChatMessage = baseProcedure
-  .input(z.object({ 
+  .input(z.object({
     sessionId: z.number(),
     message: z.string(),
   }))
-  .query(async function* ({ input }) {
+  .mutation(async ({ input }) => {
+    console.log("sendChatMessage called with:", input);
+
     // Verify session exists
     const session = await db.session.findUnique({
       where: { id: input.sessionId },
       include: { messages: true },
     });
+
+    console.log("Found session:", session);
 
     if (!session) {
       throw new TRPCError({
@@ -74,51 +48,95 @@ export const sendChatMessage = baseProcedure
       },
     });
 
-    // Prepare conversation history for OpenAI
-    const messages = [
-      { role: "system" as const, content: SOKRATES_SYSTEM_PROMPT },
-      ...session.messages.map(msg => ({
-        role: msg.role as "user" | "assistant",
-        content: msg.content,
-      })),
-      { role: "user" as const, content: input.message },
-    ];
+    try {
+      // Create a thread if it doesn't exist, or use existing thread
+      let threadId = session.openaiThreadId;
 
-    // Stream response from OpenAI using Assistants API
-    const stream = await openai.chat.completions.create({
-      assistant_id: env.ASSISTANT_ID,
-      messages,
-      stream: true,
-      response_format: {
-        type: 'json',
-        schema: streamingResponseSchema
-      }
-    });
+      if (!threadId) {
+        const thread = await openai.beta.threads.create();
+        threadId = thread.id;
 
-    let fullResponse = "";
-    
-    for await (const chunk of stream) {
-      const content = chunk.choices[0]?.delta?.content || "";
-      if (content) {
-        fullResponse += content;
-        yield {
-          type: "text" as const,
-          content,
-        };
+        // Update session with thread ID
+        await db.session.update({
+          where: { id: input.sessionId },
+          data: { openaiThreadId: threadId },
+        });
       }
+
+      // Add the user message to the thread
+      await openai.beta.threads.messages.create(threadId, {
+        role: "user",
+        content: input.message,
+      });
+
+      // Run the assistant
+      const run = await openai.beta.threads.runs.create(threadId, {
+        assistant_id: env.ASSISTANT_ID,
+      });
+
+      // Wait for the run to complete
+      let runStatus = await openai.beta.threads.runs.retrieve(run.id, { thread_id: threadId });
+
+      while (runStatus.status === "in_progress" || runStatus.status === "queued") {
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        runStatus = await openai.beta.threads.runs.retrieve(run.id, { thread_id: threadId });
+      }
+
+      if (runStatus.status === "failed") {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Assistant run failed",
+        });
+      }
+
+      // Get the assistant's response
+      const messages = await openai.beta.threads.messages.list(threadId);
+      const assistantMessage = messages.data.find(msg =>
+        msg.role === "assistant" &&
+        msg.run_id === run.id
+      );
+
+      if (!assistantMessage) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "No assistant response found",
+        });
+      }
+
+      const content = assistantMessage.content[0];
+      if (!content || content.type !== "text") {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Unexpected response format from assistant",
+        });
+      }
+
+      const assistantResponse = content.text.value;
+
+      // Save assistant message
+      await db.message.create({
+        data: {
+          sessionId: input.sessionId,
+          role: "assistant",
+          content: assistantResponse,
+        },
+      });
+
+      return {
+        success: true,
+        content: assistantResponse,
+      };
+
+    } catch (error) {
+      console.error("Error in sendChatMessage:", error);
+
+      if (error instanceof TRPCError) {
+        throw error;
+      }
+
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Failed to process message",
+      });
     }
-
-    // Save assistant message
-    await db.message.create({
-      data: {
-        sessionId: input.sessionId,
-        role: "assistant",
-        content: fullResponse,
-      },
-    });
-
-    yield {
-      type: "complete" as const,
-      content: fullResponse,
-    };
   });

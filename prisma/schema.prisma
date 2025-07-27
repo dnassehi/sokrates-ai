@@ -16,17 +16,18 @@ model Doctor {
   password   String
   clinicCode String
   createdAt  DateTime @default(now())
-  
+
   ratings    Rating[]
 }
 
 model Session {
-  id          Int      @id @default(autoincrement())
-  clinicCode  String
-  status      String   @default("active") // active, completed
-  createdAt   DateTime @default(now())
-  completedAt DateTime?
-  
+  id             Int      @id @default(autoincrement())
+  clinicCode     String
+  status         String   @default("active") // active, completed
+  openaiThreadId String?  // OpenAI thread ID for this session
+  createdAt      DateTime @default(now())
+  completedAt    DateTime?
+
   messages    Message[]
   anamnesis   Anamnesis?
   rating      Rating?
@@ -38,7 +39,7 @@ model Message {
   role      String   // user, assistant
   content   String
   createdAt DateTime @default(now())
-  
+
   session   Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
 }
 
@@ -55,7 +56,7 @@ model Anamnesis {
   pasientMaal        String
   friOppsummering    String
   createdAt          DateTime @default(now())
-  
+
   session            Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
 }
 
@@ -66,7 +67,7 @@ model Rating {
   score     Int      // 1-5 rating
   comment   String?
   createdAt DateTime @default(now())
-  
+
   session   Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
   doctor    Doctor?  @relation(fields: [doctorId], references: [id])
 }

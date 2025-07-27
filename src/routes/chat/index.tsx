@@ -35,6 +35,7 @@ function ChatPage() {
   const createSessionMutation = useMutation(
     trpc.createChatSession.mutationOptions({
       onSuccess: (data) => {
+        console.log("createChatSession success:", data);
         setSessionId(data.sessionId);
         setStep("chat");
         // Add welcome message
@@ -45,7 +46,8 @@ function ChatPage() {
           timestamp: new Date(),
         }]);
       },
-      onError: () => {
+      onError: (error) => {
+        console.error("createChatSession error:", error);
         setClinicCodeError("Ugyldig klinikkode. Vennligst prøv igjen.");
       },
     })
@@ -56,6 +58,38 @@ function ChatPage() {
     trpc.completeChatSession.mutationOptions({
       onSuccess: () => {
         navigate({ to: "/thank-you", search: { sessionId: sessionId! } });
+      },
+    })
+  );
+
+  // Send message mutation
+  const sendMessageMutation = useMutation(
+    trpc.sendChatMessage.mutationOptions({
+      onSuccess: (data) => {
+        console.log("Message sent successfully:", data);
+        // Add assistant response to chat
+        // Ensure data is not void and has content property
+        if (typeof data === "object" && data !== null && "content" in data && (data as any).content !== undefined) {
+          setMessages(prev => [
+            ...prev,
+            {
+              id: (Date.now() + 1).toString(),
+              role: "assistant",
+              content: (data as any).content,
+            timestamp: new Date(),
+          }]);
+        }
+        setIsStreaming(false);
+      },
+      onError: (error) => {
+        console.error("Error sending message:", error);
+        setMessages(prev => [...prev, {
+          id: (Date.now() + 1).toString(),
+          role: "assistant",
+          content: "Beklager, det oppstod en feil. Vennligst prøv igjen.",
+          timestamp: new Date(),
+        }]);
+        setIsStreaming(false);
       },
     })
   );
@@ -91,21 +125,21 @@ function ChatPage() {
     setIsStreaming(true);
 
     try {
-      // For now, we'll simulate the AI response since streaming is complex to implement
-      // In a real implementation, you'd handle the streaming response properly
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate delay
-      
-      const assistantMessage: ChatMessage = {
-        id: (Date.now() + 1).toString(),
-        role: "assistant",
-        content: "Takk for informasjonen. Kan du fortelle meg mer om tidligere sykdommer eller behandlinger du har hatt?",
-        timestamp: new Date(),
-      };
+      // Call the actual sendChatMessage procedure
+      console.log("Calling sendChatMessage with:", { sessionId, message: messageToSend });
 
-      setMessages(prev => [...prev, assistantMessage]);
+      sendMessageMutation.mutate({
+        sessionId,
+        message: messageToSend,
+      });
     } catch (error) {
       console.error("Error sending message:", error);
-    } finally {
+      setMessages(prev => [...prev, {
+        id: (Date.now() + 1).toString(),
+        role: "assistant",
+        content: "Beklager, det oppstod en feil. Vennligst prøv igjen.",
+        timestamp: new Date(),
+      }]);
       setIsStreaming(false);
     }
   };

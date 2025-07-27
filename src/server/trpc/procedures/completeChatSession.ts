@@ -63,7 +63,7 @@ const anamnesisJsonSchema = {
   },
   required: [
     "hovedplage",
-    "tidligereSykdommer", 
+    "tidligereSykdommer",
     "medisinering",
     "allergier",
     "familiehistorie",
@@ -102,18 +102,21 @@ export const completeChatSession = baseProcedure
       .map(msg => `${msg.role}: ${msg.content}`)
       .join("\n\n");
 
-    // Generate structured anamnesis using Assistants API
+    // Generate structured anamnesis using OpenAI Chat API
     const response = await openai.chat.completions.create({
-      assistant_id: env.ASSISTANT_ID,
+      model: "gpt-4.1-nano",
       messages: [
         {
+          role: "system",
+          content: "Du er en medisinsk assistent som ekstraherer og strukturerer medisinsk informasjon fra samtaler. Returner alltid svaret som et gyldig JSON-objekt."
+        },
+        {
           role: "user",
-          content: `Basert på følgende samtale mellom Sokrates AI-assistent og en pasient, ekstrahér og strukturer den medisinske informasjonen i de oppgitte kategoriene. Hvis informasjon mangler i en kategori, skriv "Ikke oppgitt" eller "Ingen spesifikk informasjon gitt".\n\nSamtale:\n${conversationText}`
+          content: `Basert på følgende samtale mellom Sokrates AI-assistent og en pasient, ekstrahér og strukturer den medisinske informasjonen i de oppgitte kategoriene. Hvis informasjon mangler i en kategori, skriv "Ikke oppgitt" eller "Ingen spesifikk informasjon gitt".\n\nSamtale:\n${conversationText}\n\nReturner svaret som et JSON-objekt med følgende struktur:\n{\n  "hovedplage": "string",\n  "tidligereSykdommer": "string",\n  "medisinering": "string",\n  "allergier": "string",\n  "familiehistorie": "string",\n  "sosialLivsstil": "string",\n  "ros": "string",\n  "pasientMaal": "string",\n  "friOppsummering": "string"\n}`
         }
       ],
       response_format: {
-        type: 'json',
-        schema: anamnesisJsonSchema
+        type: 'json_object'
       }
     });
 
