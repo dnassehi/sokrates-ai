@@ -24,7 +24,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
         <p className={`text-xs mt-2 ${
           message.role === "user" ? "text-blue-100" : "text-gray-400"
         }`}>
-          {formatTime(message.timestamp)}
+          {formatTime(message.createdAt)}
         </p>
       </div>
     </div>
