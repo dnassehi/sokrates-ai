@@ -82,6 +82,12 @@ src/server/api/routers/rating.ts	Lagrer pasientens tilbakemeldinger.
 	•	Hver forespørsel til API inkluderer JWT Bearer-token.
 	•	Token valideres på alle beskyttede endepunkter.
 
+📑 OpenAI-brukspolicy
+        •       Alle OpenAI-kall skjer server-side slik at API-nøkkelen ikke eksponeres.
+        •       Nøklene lagres kun i miljøvariabler og skrives ikke til databasen.
+        •       Forespørsler inkluderer `user`-feltet med anonym sesjons-ID.
+        •       Se https://openai.com/policies/usage-policies for mer informasjon.
+
 ⸻
 
 🔁 Prompt-logikk

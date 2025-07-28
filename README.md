@@ -122,6 +122,15 @@ Hver fullførte samtale genererer en strukturert anamnese med følgende felter:
 - **Klinikk-isolasjon**: Leger ser kun sesjoner fra sin egen klinikk
 - **Token-validering**: Alle API-kall valideres med JWT-tokens
 
+## 📑 OpenAI-brukspolicy
+
+- Alle kall til OpenAI skjer server-side og API-nøklene eksponeres aldri i
+  klienten.
+- Nøklene lagres kun i miljøvariabler og blir ikke lagret i databasen.
+- Forespørsler inkluderer `user`-feltet med anonym sesjons-ID i henhold til
+  retningslinjene.
+- Les mer i <https://openai.com/policies/usage-policies>.
+
 ## 🧪 Testing
 
 Applikasjonen inkluderer demo-data for testing:
