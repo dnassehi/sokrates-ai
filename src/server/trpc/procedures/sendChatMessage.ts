@@ -5,6 +5,9 @@ import { db } from "~/server/db";
 import { baseProcedure } from "~/server/trpc/main";
 import { env } from "~/server/env";
 
+const truncate = (str: string, len = 100) =>
+  str.length > len ? `${str.slice(0, len)}…` : str;
+
 const openai = new OpenAI({
   apiKey: env.OPENAI_API_KEY,
 });
@@ -53,10 +56,13 @@ export const sendChatMessage = baseProcedure
     try {
       // Create a thread if it doesn't exist, or use existing thread
       let threadId = session.openaiThreadId;
+      console.log("Current thread id:", threadId);
 
       if (!threadId) {
+        console.log("Creating new OpenAI thread");
         const thread = await openai.beta.threads.create();
         threadId = thread.id;
+        console.log("Created thread", threadId);
 
         // Update session with thread ID
         await db.session.update({
@@ -66,20 +72,29 @@ export const sendChatMessage = baseProcedure
       }
 
       // Add the user message to the thread
+      console.log(
+        "Adding message to thread",
+        threadId,
+        truncate(input.message)
+      );
       await openai.beta.threads.messages.create(threadId, {
         role: "user",
         content: input.message,
         user: `session-${input.sessionId}`,
       });
+      console.log("Message added to thread", threadId);
 
       // Run the assistant
+      console.log("Starting assistant run on thread", threadId);
       const run = await openai.beta.threads.runs.create(threadId, {
         assistant_id: env.ASSISTANT_ID,
         user: `session-${input.sessionId}`,
       });
+      console.log("Run started", run.id);
 
       // Wait for the run to complete with a timeout
       let runStatus = await openai.beta.threads.runs.retrieve(threadId, run.id);
+      console.log("Initial run status", runStatus.status);
       let retries = 0;
 
       while (
@@ -89,6 +104,10 @@ export const sendChatMessage = baseProcedure
         await new Promise(resolve => setTimeout(resolve, 1000));
         runStatus = await openai.beta.threads.runs.retrieve(threadId, run.id);
         retries += 1;
+        console.log(
+          `Polling run status (${retries}/${MAX_RUN_POLL_RETRIES})`,
+          runStatus.status
+        );
       }
 
       if (runStatus.status === "in_progress" || runStatus.status === "queued") {
@@ -105,7 +124,10 @@ export const sendChatMessage = baseProcedure
         });
       }
 
+      console.log("Run completed with status", runStatus.status);
+
       // Get the assistant's response
+      console.log("Fetching assistant messages");
       const messages = await openai.beta.threads.messages.list(threadId);
       const assistantMessage = messages.data.find(msg =>
         msg.role === "assistant" &&
@@ -128,6 +150,7 @@ export const sendChatMessage = baseProcedure
       }
 
       const assistantResponse = content.text.value;
+      console.log("Assistant response:", truncate(assistantResponse));
 
       // Save assistant message
       await db.message.create({

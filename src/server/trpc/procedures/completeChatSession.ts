@@ -5,6 +5,9 @@ import { db } from "~/server/db";
 import { baseProcedure } from "~/server/trpc/main";
 import { env } from "~/server/env";
 
+const truncate = (str: string, len = 100) =>
+  str.length > len ? `${str.slice(0, len)}…` : str;
+
 const openai = new OpenAI({
   apiKey: env.OPENAI_API_KEY,
 });
@@ -101,11 +104,23 @@ export const completeChatSession = baseProcedure
     const conversationText = session.messages
       .map(msg => `${msg.role}: ${msg.content}`)
       .join("\n\n");
+    console.log(
+      "Generating anamnesis for session",
+      input.sessionId,
+      "conversation length",
+      conversationText.length
+    );
 
     // Generate structured anamnesis using OpenAI Chat API
-    const response = await openai.chat.completions.create({
-      model: env.ANAMNESIS_MODEL,
-      user: `session-${input.sessionId}`,
+    console.log(
+      "Calling OpenAI with prompt:",
+      truncate(conversationText)
+    );
+    let response;
+    try {
+      response = await openai.chat.completions.create({
+        model: env.ANAMNESIS_MODEL,
+        user: `session-${input.sessionId}`,
       messages: [
         {
           role: "system",
@@ -121,9 +136,20 @@ export const completeChatSession = baseProcedure
         json_schema: {
           name: 'anamnesis',
           schema: anamnesisJsonSchema,
-        }
-      }
+        },
+      },
     });
+    } catch (error) {
+      console.error("Error calling OpenAI:", error);
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Failed to generate anamnesis",
+      });
+    }
+    console.log(
+      "OpenAI anamnesis response:",
+      truncate(response.choices[0]?.message?.content ?? "")
+    );
 
     const responseContent = response.choices[0]?.message?.content;
     if (!responseContent) {
