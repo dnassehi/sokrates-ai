@@ -69,11 +69,13 @@ export const sendChatMessage = baseProcedure
       await openai.beta.threads.messages.create(threadId, {
         role: "user",
         content: input.message,
+        user: `session-${input.sessionId}`,
       });
 
       // Run the assistant
       const run = await openai.beta.threads.runs.create(threadId, {
         assistant_id: env.ASSISTANT_ID,
+        user: `session-${input.sessionId}`,
       });
 
       // Wait for the run to complete with a timeout
