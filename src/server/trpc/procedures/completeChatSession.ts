@@ -116,9 +116,12 @@ export const completeChatSession = baseProcedure
         }
       ],
       response_format: {
-        type: 'json_object',
-        schema: anamnesisJsonSchema,
-      } as any
+        type: 'json_schema',
+        json_schema: {
+          name: 'anamnesis',
+          schema: anamnesisJsonSchema,
+        }
+      }
     });
 
     const responseContent = response.choices[0]?.message?.content;
