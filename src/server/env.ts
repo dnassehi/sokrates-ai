@@ -11,6 +11,7 @@ const envSchema = z.object({
   ADMIN_PASSWORD: z.string(),
   OPENAI_API_KEY: z.string(),
   ASSISTANT_ID: z.string(),
+  ANAMNESIS_MODEL: z.string(),
   JWT_SECRET: z.string(),
 });
 

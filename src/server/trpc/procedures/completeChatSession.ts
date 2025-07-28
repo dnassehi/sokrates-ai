@@ -104,7 +104,7 @@ export const completeChatSession = baseProcedure
 
     // Generate structured anamnesis using OpenAI Chat API
     const response = await openai.chat.completions.create({
-      model: "gpt-4.1-nano",
+      model: env.ANAMNESIS_MODEL,
       messages: [
         {
           role: "system",
@@ -116,8 +116,9 @@ export const completeChatSession = baseProcedure
         }
       ],
       response_format: {
-        type: 'json_object'
-      }
+        type: 'json_object',
+        schema: anamnesisJsonSchema,
+      } as any
     });
 
     const responseContent = response.choices[0]?.message?.content;
