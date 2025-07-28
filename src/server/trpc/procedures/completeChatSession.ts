@@ -105,6 +105,7 @@ export const completeChatSession = baseProcedure
     // Generate structured anamnesis using OpenAI Chat API
     const response = await openai.chat.completions.create({
       model: env.ANAMNESIS_MODEL,
+      user: `session-${input.sessionId}`,
       messages: [
         {
           role: "system",
