@@ -16,7 +16,7 @@ export interface ChatMessage {
   id: string;
   role: "user" | "assistant";
   content: string;
-  timestamp: Date;
+  createdAt: Date;
 }
 
 function ChatPage() {
@@ -43,7 +43,7 @@ function ChatPage() {
           id: "welcome",
           role: "assistant",
           content: "Hei! Jeg er Sokrates, din AI-assistent. Jeg vil hjelpe deg med å fylle ut en medisinsk anamnese gjennom en samtale. La oss begynne - kan du fortelle meg hva som er din hovedbekymring eller grunn til at du søker medisinsk hjelp i dag?",
-          timestamp: new Date(),
+          createdAt: new Date(),
         }]);
       },
       onError: (error) => {
@@ -76,7 +76,7 @@ function ChatPage() {
               id: (Date.now() + 1).toString(),
               role: "assistant",
               content: (data as any).content,
-            timestamp: new Date(),
+            createdAt: new Date(),
           }]);
         }
         setIsStreaming(false);
@@ -87,7 +87,7 @@ function ChatPage() {
           id: (Date.now() + 1).toString(),
           role: "assistant",
           content: "Beklager, det oppstod en feil. Vennligst prøv igjen.",
-          timestamp: new Date(),
+          createdAt: new Date(),
         }]);
         setIsStreaming(false);
       },
@@ -116,7 +116,7 @@ function ChatPage() {
       id: Date.now().toString(),
       role: "user",
       content: currentMessage,
-      timestamp: new Date(),
+      createdAt: new Date(),
     };
 
     setMessages(prev => [...prev, userMessage]);
@@ -138,7 +138,7 @@ function ChatPage() {
         id: (Date.now() + 1).toString(),
         role: "assistant",
         content: "Beklager, det oppstod en feil. Vennligst prøv igjen.",
-        timestamp: new Date(),
+        createdAt: new Date(),
       }]);
       setIsStreaming(false);
     }
