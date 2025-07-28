@@ -17,12 +17,12 @@ export function ChatMessage({ message }: ChatMessageProps) {
         className={`max-w-2xl px-4 py-3 rounded-2xl ${
           message.role === "user"
             ? "bg-blue-500 text-white"
-            : "bg-white shadow-sm border"
+            : "bg-white shadow-sm border text-gray-900"
         }`}
       >
         <p className="whitespace-pre-wrap">{message.content}</p>
         <p className={`text-xs mt-2 ${
-          message.role === "user" ? "text-blue-100" : "text-gray-400"
+          message.role === "user" ? "text-blue-100" : "text-gray-600"
         }`}>
           {formatTime(message.createdAt)}
         </p>

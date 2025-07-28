@@ -6,13 +6,13 @@ interface ChatHeaderProps {
   canCompleteSession: boolean;
 }
 
-export function ChatHeader({ 
-  onCompleteSession, 
-  isCompletingSession, 
-  canCompleteSession 
+export function ChatHeader({
+  onCompleteSession,
+  isCompletingSession,
+  canCompleteSession
 }: ChatHeaderProps) {
   return (
-    <div className="bg-white shadow-sm border-b px-4 py-4">
+    <div className="bg-white shadow-sm border-b px-4 py-4 sticky top-0 z-10">
       <div className="max-w-4xl mx-auto flex items-center justify-between">
         <div className="flex items-center space-x-3">
           <MessageCircle className="w-8 h-8 text-blue-500" />

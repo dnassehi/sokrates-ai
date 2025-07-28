@@ -73,6 +73,27 @@ Sokrates AI er en intelligent samtaleassistent som hjelper pasienter med å fyll
 6. **Åpne nettleseren**
    Gå til `http://localhost:8000` for å se applikasjonen
 
+### Tilgang til databasen
+
+#### Prisma Studio (Anbefalt)
+```bash
+npx prisma studio --schema=prisma/schema.local.prisma
+```
+Åpne http://localhost:5555 i nettleseren
+
+#### Adminer (Web-basert)
+- URL: http://localhost:8080
+- Server: `postgres`
+- Brukernavn: `postgres`
+- Passord: `postgres`
+- Database: `app`
+
+#### Direkte PostgreSQL-tilkobling
+```bash
+psql -h localhost -p 5432 -U postgres -d app
+```
+Passord: `postgres`
+
 ### Demo-konto
 
 Applikasjonen oppretter automatisk en demo-lege-konto:
