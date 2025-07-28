@@ -75,11 +75,11 @@ export const sendChatMessage = baseProcedure
       });
 
       // Wait for the run to complete
-      let runStatus = await openai.beta.threads.runs.retrieve(run.id, { thread_id: threadId });
+      let runStatus = await openai.beta.threads.runs.retrieve(threadId, run.id);
 
       while (runStatus.status === "in_progress" || runStatus.status === "queued") {
         await new Promise(resolve => setTimeout(resolve, 1000));
-        runStatus = await openai.beta.threads.runs.retrieve(run.id, { thread_id: threadId });
+        runStatus = await openai.beta.threads.runs.retrieve(threadId, run.id);
       }
 
       if (runStatus.status === "failed") {
