@@ -100,7 +100,10 @@ export const sendChatMessage = baseProcedure
 
       // Wait for the run to complete with a timeout
       console.log("Retrieving run status for threadId:", threadId, "runId:", run.id);
-      let runStatus = await (openai.beta.threads.runs.retrieve as any)(threadId, run.id);
+      let runStatus = await (openai.beta.threads.runs.retrieve as any)({
+        threadId,
+        runId: run.id,
+      });
       console.log("Initial run status", runStatus.status);
       let retries = 0;
 
@@ -109,7 +112,10 @@ export const sendChatMessage = baseProcedure
         retries < MAX_RUN_POLL_RETRIES
       ) {
         await new Promise(resolve => setTimeout(resolve, 1000));
-        runStatus = await (openai.beta.threads.runs.retrieve as any)(threadId, run.id);
+        runStatus = await (openai.beta.threads.runs.retrieve as any)({
+          threadId,
+          runId: run.id,
+        });
         retries += 1;
         console.log(
           `Polling run status (${retries}/${MAX_RUN_POLL_RETRIES})`,
