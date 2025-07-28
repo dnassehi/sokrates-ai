@@ -80,7 +80,6 @@ export const sendChatMessage = baseProcedure
       await openai.beta.threads.messages.create(threadId, {
         role: "user",
         content: input.message,
-        user: `session-${input.sessionId}`,
       });
       console.log("Message added to thread", threadId);
 
@@ -88,12 +87,20 @@ export const sendChatMessage = baseProcedure
       console.log("Starting assistant run on thread", threadId);
       const run = await openai.beta.threads.runs.create(threadId, {
         assistant_id: env.ASSISTANT_ID,
-        user: `session-${input.sessionId}`,
       });
       console.log("Run started", run.id);
+      console.log("Run object:", JSON.stringify(run, null, 2));
+
+      if (!run.id) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to create run - no run ID returned",
+        });
+      }
 
       // Wait for the run to complete with a timeout
-      let runStatus = await openai.beta.threads.runs.retrieve(threadId, run.id);
+      console.log("Retrieving run status for threadId:", threadId, "runId:", run.id);
+      let runStatus = await openai.beta.threads.runs.retrieve(threadId, run.id) as any;
       console.log("Initial run status", runStatus.status);
       let retries = 0;
 
@@ -102,7 +109,7 @@ export const sendChatMessage = baseProcedure
         retries < MAX_RUN_POLL_RETRIES
       ) {
         await new Promise(resolve => setTimeout(resolve, 1000));
-        runStatus = await openai.beta.threads.runs.retrieve(threadId, run.id);
+        runStatus = await openai.beta.threads.runs.retrieve(threadId, run.id) as any;
         retries += 1;
         console.log(
           `Polling run status (${retries}/${MAX_RUN_POLL_RETRIES})`,

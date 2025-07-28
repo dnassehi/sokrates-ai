@@ -120,8 +120,7 @@ export const completeChatSession = baseProcedure
     try {
       response = await openai.chat.completions.create({
         model: env.ANAMNESIS_MODEL,
-        user: `session-${input.sessionId}`,
-      messages: [
+        messages: [
         {
           role: "system",
           content: "Du er en medisinsk assistent som ekstraherer og strukturerer medisinsk informasjon fra samtaler. Returner alltid svaret som et gyldig JSON-objekt."
