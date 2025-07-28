@@ -9,6 +9,8 @@ const openai = new OpenAI({
   apiKey: env.OPENAI_API_KEY,
 });
 
+const MAX_RUN_POLL_RETRIES = 30; // Limit number of status checks
+
 export const sendChatMessage = baseProcedure
   .input(z.object({
     sessionId: z.number(),
@@ -74,12 +76,24 @@ export const sendChatMessage = baseProcedure
         assistant_id: env.ASSISTANT_ID,
       });
 
-      // Wait for the run to complete
+      // Wait for the run to complete with a timeout
       let runStatus = await openai.beta.threads.runs.retrieve(threadId, run.id);
+      let retries = 0;
 
-      while (runStatus.status === "in_progress" || runStatus.status === "queued") {
+      while (
+        (runStatus.status === "in_progress" || runStatus.status === "queued") &&
+        retries < MAX_RUN_POLL_RETRIES
+      ) {
         await new Promise(resolve => setTimeout(resolve, 1000));
         runStatus = await openai.beta.threads.runs.retrieve(threadId, run.id);
+        retries += 1;
+      }
+
+      if (runStatus.status === "in_progress" || runStatus.status === "queued") {
+        throw new TRPCError({
+          code: "TIMEOUT",
+          message: "Assistant did not finish in time",
+        });
       }
 
       if (runStatus.status === "failed") {
