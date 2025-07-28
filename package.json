@@ -69,5 +69,6 @@
     "vite-tsconfig-paths": "^5.1.4"
   },
   "private": true,
-  "type": "module"
+  "type": "module",
+  "license": "MIT"
 }
