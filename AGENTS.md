@@ -67,12 +67,12 @@ Schemaet sendes inn som del av response_format.schema for å validere strukturen
 📂 Relevant Filstruktur
 
 Fil	Formål
-src/server/api/routers/chat.ts	Kaller OpenAI Assistant API med streaming-respons.
-src/components/ChatWindow.tsx	UI-komponent for chat og brukerinput.
-src/lib/firebase.ts	Firebase-klient initialisering.
-src/pages/chat.tsx	Starter ny sesjon med anonym innlogging.
-src/server/api/routers/session.ts	Håndterer sesjonshåndtering og databaseintegrasjon.
-src/server/api/routers/rating.ts	Lagrer pasientens tilbakemeldinger.
+src/server/trpc/procedures/sendChatMessage.ts	Kaller OpenAI Assistant API med streaming-respons.
+src/routes/chat/index.tsx	Side som håndterer chat-UI og innlogging.
+src/server/db.ts	Prisma-databaseklient.
+src/routes/chat/index.tsx	Starter ny sesjon med anonym innlogging.
+src/server/trpc/procedures/createChatSession.ts	Håndterer sesjonsopprettelse og databaseintegrasjon.
+src/server/trpc/procedures/submitRating.ts	Lagrer pasientens tilbakemeldinger.
 
 
 ⸻
