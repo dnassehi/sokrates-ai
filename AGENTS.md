@@ -28,7 +28,12 @@ JWT_SECRET="..."
 🧠 Brukt API: OpenAI Assistants API
 	•	Modell: GPT-4o
 	•	Assistant ID: Definert i .env.local
-	•	Metode: chat.completions.create({ assistant_id, messages, response_format })
+        •       Arbeidsflyt: openai.beta.threads.* API
+                1. threads.create() – opprett ny tråd
+                2. threads.messages.create() – send brukermelding
+                3. threads.runs.create() – start run med assistant
+                4. threads.runs.retrieve() – poll fremdrift
+                5. threads.messages.list() – hent svar
 	•	Svarformat:
 
 response_format = {
@@ -104,17 +109,22 @@ Promptene styrer samtaletonen med pasienten.
 
 ⸻
 
+
 🧩 Eksempel på API-kall
 
-const stream = await openai.chat.completions.create({
+const thread = await openai.beta.threads.create();
+
+await openai.beta.threads.messages.create(thread.id, {
+  role: 'user',
+  content: brukerMelding,
+});
+
+const run = await openai.beta.threads.runs.create(thread.id, {
   assistant_id: process.env.ASSISTANT_ID!,
-  messages: [systemPrompt, ...messages],
-  response_format: {
-    type: 'json',
-    schema: <json-skjema>,
-  },
-  stream: true,
-}, { responseType: 'stream' });
+});
+
+const result = await openai.beta.threads.runs.retrieve(thread.id, run.id);
+const messages = await openai.beta.threads.messages.list(thread.id);
 
 
 ⸻
