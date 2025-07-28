@@ -59,13 +59,18 @@ Sokrates AI er en intelligent samtaleassistent som hjelper pasienter med å fyll
    - `JWT_SECRET`: En lang, tilfeldig streng for JWT-signering (minst 32 tegn)
    og endre `NODE_ENV` fra `development` til `production`
 
-4. **Start applikasjonen**
+   Legg en kopi av den nye `.env` i `docker`-mappen.
+   ```bash
+   cp .env /docker/.env
+   ```
+
+5. **Start applikasjonen**
    ```bash
    cd docker
    docker-compose up --build -d
    ```
 
-5. **Åpne nettleseren**
+6. **Åpne nettleseren**
    Gå til `http://localhost:8000` for å se applikasjonen
 
 ### Demo-konto
