@@ -31,7 +31,7 @@ Sokrates AI er en intelligent samtaleassistent som hjelper pasienter med å fyll
 ## 🚀 Kom i gang
 
 ### Forutsetninger
-- Node.js (v18 eller nyere)
+- Node.js (v22 eller nyere)
 - Docker og Docker Compose
 - OpenAI API-nøkkel
 
