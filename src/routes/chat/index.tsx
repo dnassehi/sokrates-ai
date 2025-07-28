@@ -157,6 +157,9 @@ function ChatPage() {
     }
   };
 
+  const disclaimerText =
+    "Sokrates AI gir ikke medisinsk rådgivning. Kontakt alltid kvalifisert helsepersonell for medisinske spørsmål.";
+
   if (step === "clinic-code") {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center">
@@ -219,6 +222,7 @@ function ChatPage() {
                 ← Tilbake til forsiden
               </Link>
             </div>
+            <p className="mt-6 text-xs text-gray-500 text-center">{disclaimerText}</p>
           </div>
         </div>
       </div>
@@ -265,6 +269,7 @@ function ChatPage() {
         onKeyPress={handleKeyPress}
         isDisabled={isStreaming}
       />
+      <p className="text-xs text-gray-500 text-center px-4 py-2">{disclaimerText}</p>
     </div>
   );
 }

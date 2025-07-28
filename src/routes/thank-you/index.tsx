@@ -26,6 +26,8 @@ function ThankYouPage() {
   const trpc = useTRPC();
   const [submitted, setSubmitted] = useState(false);
   const [selectedRating, setSelectedRating] = useState(0);
+  const disclaimerText =
+    "Sokrates AI gir ikke medisinsk rådgivning. Kontakt alltid kvalifisert helsepersonell for medisinske spørsmål.";
 
   const {
     register,
@@ -68,6 +70,7 @@ function ThankYouPage() {
             <Home className="w-4 h-4 mr-2" />
             Tilbake til forsiden
           </Link>
+          <p className="mt-6 text-xs text-gray-500 text-center">{disclaimerText}</p>
         </div>
       </div>
     );
@@ -163,9 +166,10 @@ function ThankYouPage() {
                 </p>
               </div>
             )}
-          </div>
         </div>
       </div>
+      <p className="mt-6 text-xs text-gray-500 text-center">{disclaimerText}</p>
     </div>
+  </div>
   );
 }
