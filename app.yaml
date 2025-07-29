@@ -6,7 +6,7 @@ services:
     github:
       repo: dnassehi/sokrates-ai
       branch: main
-    run_command: pnpm start
+    run_command: pnpm start --port 3000 --host 0.0.0.0
     build_command: pnpm run postinstall && pnpm run build
     environment_slug: node-js
     instance_count: 1
@@ -39,6 +39,8 @@ services:
         value: ${db.DATABASE_URL}
       - key: PORT
         value: "3000"
+      - key: HOST
+        value: "0.0.0.0"
     health_check:
       http_path: /
       initial_delay_seconds: 60
