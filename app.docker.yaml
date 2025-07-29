@@ -6,8 +6,8 @@ services:
     github:
       repo: dnassehi/sokrates-ai
       branch: main
-    run_command: npm start
-    build_command: npm run build
+    run_command: pnpm start
+    build_command: pnpm run build
     environment_slug: node-js
     instance_count: 1
     instance_size_slug: basic-xxs
