@@ -13,6 +13,8 @@ services:
     instance_size_slug: basic-xxs
     internal_ports:
       - 3000
+    routes:
+      - path: /
     envs:
       - key: NODE_ENV
         value: production
