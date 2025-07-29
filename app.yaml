@@ -14,9 +14,7 @@ services:
     min_instance_count: 1
     internal_ports:
       - 3000
-    public_ports:
-      - 5173
-    routes:
+        routes:
       - path: /
     envs:
       - key: NODE_ENV
