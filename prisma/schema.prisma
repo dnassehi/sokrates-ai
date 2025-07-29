@@ -7,7 +7,10 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = "postgresql://postgres:postgres@postgres/app" // hardcoded because it's an internal docker connection
+  // For Docker/local development:
+  // url      = "postgresql://postgres:postgres@postgres/app"
+  // For DigitalOcean/production:
+  url      = env("DATABASE_URL")
 }
 
 model Doctor {

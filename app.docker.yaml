@@ -1,0 +1,43 @@
+name: sokrates-ai-docker
+region: fra1
+services:
+  - name: web
+    source_dir: /
+    github:
+      repo: dnassehi/sokrates-ai
+      branch: main
+    run_command: npm start
+    build_command: npm run build
+    environment_slug: node-js
+    instance_count: 1
+    instance_size_slug: basic-xxs
+    internal_ports:
+      - 3000
+    envs:
+      - key: NODE_ENV
+        value: production
+      - key: BASE_URL
+        value: https://sokrates-docker.ondigitalocean.app
+      - key: BASE_URL_OTHER_PORT
+        value: https://sokrates-docker.ondigitalocean.app
+      - key: ADMIN_PASSWORD
+        value: ${ADMIN_PASSWORD}
+      - key: OPENAI_API_KEY
+        value: ${OPENAI_API_KEY}
+      - key: ASSISTANT_ID
+        value: ${ASSISTANT_ID}
+      - key: ANAMNESIS_MODEL
+        value: gpt-4o
+      - key: JWT_SECRET
+        value: ${JWT_SECRET}
+      # Note: For Docker deployment, you need to provide DATABASE_URL manually
+      - key: DATABASE_URL
+        value: ${DATABASE_URL}
+    health_check:
+      http_path: /
+      initial_delay_seconds: 10
+      interval_seconds: 10
+      timeout_seconds: 5
+      success_threshold: 1
+      failure_threshold: 3
+# No managed database - you need to provide external database

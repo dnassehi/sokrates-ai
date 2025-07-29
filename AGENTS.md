@@ -194,6 +194,40 @@ const response = await openai.chat.completions.create({
 
 ## 🗄️ Database-struktur
 
+### Database-konfigurasjon
+
+#### Prisma Schema (`prisma/schema.prisma`)
+```prisma
+datasource db {
+  provider = "postgresql"
+  // For Docker/local development:
+  // url      = "postgresql://postgres:postgres@postgres/app"
+  // For DigitalOcean/production:
+  url      = env("DATABASE_URL")
+}
+```
+
+#### Docker/Local Development
+- **Host**: `postgres` (Docker service name)
+- **Port**: `5432`
+- **Database**: `app`
+- **Username**: `postgres`
+- **Password**: `postgres`
+
+For å bytte til Docker-modus, uncomment Docker URL og comment ut env-versjonen:
+```prisma
+datasource db {
+  provider = "postgresql"
+  url      = "postgresql://postgres:postgres@postgres/app" // Docker mode
+  // url      = env("DATABASE_URL") // Production mode
+}
+```
+
+#### DigitalOcean Production
+- Bruker managed PostgreSQL database
+- Connection string leveres via `DATABASE_URL` environment variable
+- Private connection for sikkerhet
+
 ### Hovedmodeller:
 - **Doctor**: Lege-kontoer med e-post, passord, klinikkode
 - **Session**: Pasientsesjoner med status, OpenAI thread ID

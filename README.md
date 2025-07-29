@@ -193,6 +193,61 @@ pnpm run build
 ### Database-migrering
 Databasen oppdateres automatisk ved oppstart. Ingen manuelle migreringer nødvendig.
 
+## 🚀 Deployment
+
+### Docker Compose (Lokal/Development)
+```bash
+cd docker
+docker-compose up --build -d
+```
+
+### DigitalOcean App Platform (Production)
+
+#### Konfigurasjon
+- **app.yaml**: Hovedkonfigurasjon for DigitalOcean med managed database
+- **app.docker.yaml**: Alternativ konfigurasjon for Docker-basert deployment
+
+#### Database-konfigurasjon
+```prisma
+// prisma/schema.prisma
+datasource db {
+  provider = "postgresql"
+  // For Docker/local development:
+  // url      = "postgresql://postgres:postgres@postgres/app"
+  // For DigitalOcean/production:
+  url      = env("DATABASE_URL")
+}
+```
+
+#### Bytte mellom Docker og Production
+1. **Docker-modus**: Uncomment Docker URL og comment ut env-versjonen
+2. **Production-modus**: Uncomment env-versjonen og comment ut Docker URL
+
+#### Environment Variables for DigitalOcean
+```
+NODE_ENV=production
+BASE_URL=https://sokrates.chat
+BASE_URL_OTHER_PORT=https://sokrates.chat
+ADMIN_PASSWORD=din-admin-passord
+OPENAI_API_KEY=sk-proj-...
+ASSISTANT_ID=asst_IlsGgy58NV1mFIPpqkueAnRx
+ANAMNESIS_MODEL=gpt-4o
+JWT_SECRET=din-jwt-secret
+DATABASE_URL=${db.DATABASE_URL}
+```
+
+#### Deploy til DigitalOcean
+```bash
+# Via CLI
+doctl apps create --spec app.yaml
+
+# Eller via dashboard
+# 1. Gå til DigitalOcean App Platform
+# 2. Velg "Create App"
+# 3. Velg "App Spec"
+# 4. Lim inn innholdet fra app.yaml
+```
+
 ## 🤝 Bidrag
 
 1. Fork repositoryet
