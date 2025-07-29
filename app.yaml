@@ -14,6 +14,8 @@ services:
     min_instance_count: 1
     internal_ports:
       - 3000
+    external_ports:
+      - 5173
     routes:
       - path: /
     envs:
