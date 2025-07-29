@@ -11,10 +11,11 @@ services:
     environment_slug: node-js
     instance_count: 1
     instance_size_slug: basic-xxs
-    internal_ports:
+    public_ports:
       - 3000
     routes:
       - path: /
+        preserve_path_prefix: false
     envs:
       - key: NODE_ENV
         value: production
@@ -34,9 +35,11 @@ services:
         value: ${JWT_SECRET}
       - key: DATABASE_URL
         value: ${db.DATABASE_URL}
+      - key: PORT
+        value: "3000"
     health_check:
       http_path: /
-      initial_delay_seconds: 10
+      initial_delay_seconds: 30
       interval_seconds: 10
       timeout_seconds: 5
       success_threshold: 1
