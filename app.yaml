@@ -17,9 +17,9 @@ services:
       - key: NODE_ENV
         value: production
       - key: BASE_URL
-        value: https://sokrates.chat
+        value: https://sokrates-ai-g8gj8.ondigitalocean.app
       - key: BASE_URL_OTHER_PORT
-        value: https://sokrates.chat
+        value: https://sokrates-ai-g8gj8.ondigitalocean.app
       - key: ADMIN_PASSWORD
         value: ${ADMIN_PASSWORD}
       - key: OPENAI_API_KEY
