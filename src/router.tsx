@@ -7,6 +7,7 @@ export function createRouter() {
     scrollRestoration: true,
     defaultPreload: "intent",
     defaultPendingComponent: () => <div>Loading...</div>,
+    basepath: "/",
   });
 
   return router;

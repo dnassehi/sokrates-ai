@@ -7,15 +7,15 @@ services:
       repo: dnassehi/sokrates-ai
       branch: main
     run_command: pnpm start
-    build_command: pnpm run build
+    build_command: pnpm run postinstall && pnpm run build
     environment_slug: node-js
     instance_count: 1
     instance_size_slug: basic-xxs
+    min_instance_count: 1
     public_ports:
       - 3000
     routes:
       - path: /
-        preserve_path_prefix: false
     envs:
       - key: NODE_ENV
         value: production
@@ -39,9 +39,9 @@ services:
         value: "3000"
     health_check:
       http_path: /
-      initial_delay_seconds: 30
+      initial_delay_seconds: 60
       interval_seconds: 10
-      timeout_seconds: 5
+      timeout_seconds: 10
       success_threshold: 1
       failure_threshold: 3
 databases:
