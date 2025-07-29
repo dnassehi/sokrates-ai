@@ -12,6 +12,8 @@ services:
     instance_count: 1
     instance_size_slug: basic-xxs
     min_instance_count: 1
+    public_ports:
+      - 80
     internal_ports:
       - 3000
         routes:
