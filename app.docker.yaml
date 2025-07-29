@@ -1,5 +1,5 @@
 name: sokrates-ai-docker
-region: fra1
+region: ams3
 services:
   - name: web
     source_dir: /
