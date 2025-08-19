@@ -36,7 +36,7 @@ Sokrates AI er en intelligent samtaleassistent som hjelper pasienter med å fyll
 ### Forutsetninger
 - Node.js (v22 eller nyere)
 - Docker og Docker Compose
-- OpenAI API-nøkkel
+- Mistral AI API-nøkkel
 
 ### Installasjon
 
@@ -58,7 +58,8 @@ Sokrates AI er en intelligent samtaleassistent som hjelper pasienter med å fyll
    ```
 
    Rediger `.env` og legg til:
-   - `OPENAI_API_KEY`: Din OpenAI API-nøkkel
+   - `MISTRAL_API_KEY`: Din Mistral AI API-nøkkel
+   - `MISTRAL_MODEL`: Mistral AI modell (f.eks. "mistral-large-latest")
    - `JWT_SECRET`: En lang, tilfeldig streng for JWT-signering (minst 32 tegn)
    og endre `NODE_ENV` fra `development` til `production`
 
@@ -139,7 +140,7 @@ Systemet støtter markdown-formatering i alle AI-svar og anamnese-felter for bed
 
 ### Streaming og JSON-format
 - **Chat-streaming**: Bruker Mistral AI streaming API for bedre ytelse
-- **JSON-anamnese**: Automatisk strukturert output med `responseFormat: { type: "json_object" }`
+- **JSON-anamnese**: Automatisk strukturert output med JSON-formatering
 - **Sikkerhet**: Ingen data lagres hos Mistral AI
 - **Real-time**: Brukere ser svaret bygges opp gradvis
 
@@ -206,14 +207,14 @@ Hver fullførte samtale genererer en strukturert anamnese med følgende felter:
 - **Klinikk-isolasjon**: Leger ser kun sesjoner fra sin egen klinikk
 - **Token-validering**: Alle API-kall valideres med JWT-tokens
 
-## 📑 OpenAI-brukspolicy
+## 📑 Mistral AI-brukspolicy
 
-- Alle kall til OpenAI skjer server-side og API-nøklene eksponeres aldri i
+- Alle kall til Mistral AI skjer server-side og API-nøklene eksponeres aldri i
   klienten.
 - Nøklene lagres kun i miljøvariabler og blir ikke lagret i databasen.
-- Forespørsler inkluderer `user`-feltet med anonym sesjons-ID i henhold til
+- Forespørsler inkluderer anonym sesjons-ID i henhold til
   retningslinjene.
-- Les mer i <https://openai.com/policies/usage-policies>.
+- Les mer i [Mistral AI Terms](https://mistral.ai/terms) og [Data Processing Addendum](https://mistral.ai/terms#data-processing-addendum).
 
 ## 🧪 Testing
 
@@ -287,9 +288,8 @@ NODE_ENV=production
 BASE_URL=https://sokrates.chat
 BASE_URL_OTHER_PORT=https://sokrates.chat
 ADMIN_PASSWORD=din-admin-passord
-OPENAI_API_KEY=sk-proj-...
-ASSISTANT_ID=asst_IlsGgy58NV1mFIPpqkueAnRx
-ANAMNESIS_MODEL=gpt-4o
+MISTRAL_API_KEY=din-mistral-api-nøkkel
+MISTRAL_MODEL=mistral-large-latest
 JWT_SECRET=din-jwt-secret
 DATABASE_URL=${db.DATABASE_URL}
 ```

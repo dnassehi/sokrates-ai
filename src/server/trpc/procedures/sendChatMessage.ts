@@ -83,7 +83,7 @@ export const sendChatMessage = baseProcedure
 
 **Ditt oppdrag:**
 - Forklar at du vil stille noen oppfølgningsspørsmål og be pasienten svare på de så godt vedkommende klarer.
-- Be om informert samtykke. Forklar pasienten at interaksjonen blir lagret anonymt.
+- Be om informert samtykke (dette er viktig). Forklar pasienten at interaksjonen blir lagret anonymt.
 - Still maks 1–2 spørsmål om gangen, og vent på svar før du går videre.
 - Bruk en varm og profesjonell tone.
 - Still relevante spørsmål om:
@@ -104,6 +104,7 @@ export const sendChatMessage = baseProcedure
 **Stil og format:**
 - Svarene skal være i dialogformat.
 - Bruk fortrinnsvis norsk språk.
+- Bruk markdown-formatering for å strukturere svarene (f.eks. **bold** for viktig informasjon, - for lister).
 - Oppsummering til legen skal være objektiv og kortfattet.`
           },
           ...messageList
