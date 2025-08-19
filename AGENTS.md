@@ -1,6 +1,6 @@
-# 🧠 Sokrates AI – Mistral AI Agent Integrasjon
+# 🧠 Sokrates AI – OpenAI Assistant API Integrasjon
 
-Dette dokumentet forklarer hvordan Mistral AI Agent API er integrert i Sokrates AI-prosjektet. Det gir veiledning for utviklere og AI-agenter som skal forstå, videreutvikle eller jobbe med systemet.
+Dette dokumentet forklarer hvordan OpenAI Assistant API er integrert i Sokrates AI-prosjektet. Det gir veiledning for utviklere og AI-agenter som skal forstå, videreutvikle eller jobbe med systemet.
 
 ### 🎨 Markdown-rendering
 
@@ -18,7 +18,7 @@ Markdown-rendering er implementert med `markdown-to-jsx` og `@tailwindcss/typogr
 
 ## 📌 Formål
 
-Mistral AI Agent API brukes for å lede pasienten gjennom en sokratisk samtale og samle inn strukturert medisinsk anamnesedata. Samtalene mellom pasienten og assistenten genererer et JSON-objekt som kan vurderes av legen.
+OpenAI Assistant API brukes for å lede pasienten gjennom en sokratisk samtale og samle inn strukturert medisinsk anamnesedata. Samtalene mellom pasienten og assistenten genererer et JSON-objekt som kan vurderes av legen.
 
 ---
 
@@ -29,14 +29,14 @@ Mistral AI Agent API brukes for å lede pasienten gjennom en sokratisk samtale o
 Alle API-nøkler defineres i `.env` (ikke versjonskontrollér sensitive data):
 
 ```env
+APP_NAME=sokrates-ai
+NODE_ENV=production
+BASE_URL=http://localhost:3000
+BASE_URL_OTHER_PORT=http://localhost:5173
+ADMIN_PASSWORD="long_complex_password"
 MISTRAL_API_KEY="your_mistral_api_key_here"
 MISTRAL_MODEL="mistral-large-latest"
 JWT_SECRET="..."
-
-# Legacy OpenAI configuration (deprecated)
-# OPENAI_API_KEY="sk-..."
-# ASSISTANT_ID="asst_..."
-# ANAMNESIS_MODEL="gpt-4o"
 ```
 
 ### 🧠 Brukt API: Mistral AI Chat Completions API
@@ -69,7 +69,7 @@ JWT_SECRET="..."
 
 ## 🧾 JSON-schema (Anamnese-svar)
 
-Mistral AI-agenten genererer strukturert JSON:
+Mistral-modellen genererer strukturert JSON:
 
 ```json
 {
@@ -91,8 +91,8 @@ Mistral AI-agenten genererer strukturert JSON:
 
 | Fil | Formål |
 |-----|--------|
-| `src/server/trpc/procedures/sendChatMessage.ts` | Kaller Mistral AI Agent API |
-| `src/server/trpc/procedures/completeChatSession.ts` | Genererer strukturert anamnese fra samtale via Mistral |
+| `src/server/trpc/procedures/sendChatMessage.ts` | Kaller Mistral modellen |
+| `src/server/trpc/procedures/completeChatSession.ts` | Genererer strukturert anamnese fra samtale |
 | `src/routes/chat/index.tsx` | Chat-UI for pasienter |
 | `src/components/ChatMessage.tsx` | Chat-melding komponent med markdown-rendering |
 | `src/server/db.ts` | Prisma-databaseklient |
@@ -111,9 +111,9 @@ Mistral AI-agenten genererer strukturert JSON:
 
 ---
 
-## 📑 Mistral AI-brukspolicy
+## 📑 Mistral-brukspolicy
 
-- Alle Mistral AI-kall skjer server-side slik at API-nøkkelen ikke eksponeres
+- Alle Mistral-kall skjer server-side slik at API-nøkkelen ikke eksponeres
 - Nøklene lagres kun i miljøvariabler og skrives ikke til databasen
 - Forespørsler inkluderer anonym sesjons-ID for tracking
 - Se https://openai.com/policies/usage-policies for mer informasjon
