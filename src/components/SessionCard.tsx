@@ -1,22 +1,20 @@
 import { Link } from "@tanstack/react-router";
-import { 
-  CheckCircle, 
-  Clock, 
-  Star, 
+import {
+  CheckCircle,
+  Clock,
+  Star,
   Eye,
   MessageCircle
 } from "lucide-react";
 
 interface Session {
   id: number;
-  status: "active" | "completed";
-  createdAt: string;
-  completedAt?: string;
+  status: string;
+  createdAt: Date;
+  completedAt: Date | null;
   messageCount: number;
   hasAnamnesis: boolean;
-  rating?: {
-    score: number;
-  };
+  rating: { score: number; comment: string | null; } | null;
 }
 
 interface SessionCardProps {
@@ -24,8 +22,9 @@ interface SessionCardProps {
 }
 
 export function SessionCard({ session }: SessionCardProps) {
-  const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString("no-NO", {
+  const formatDate = (date: string | Date) => {
+    const dateObj = typeof date === 'string' ? new Date(date) : date;
+    return dateObj.toLocaleDateString("no-NO", {
       year: "numeric",
       month: "short",
       day: "numeric",
@@ -64,7 +63,7 @@ export function SessionCard({ session }: SessionCardProps) {
             {getStatusIcon(session.status)}
             <span className="ml-1 capitalize">{session.status}</span>
           </div>
-          
+
           <div>
             <p className="text-sm font-medium text-gray-900">
               Sesjon #{session.id}
@@ -77,7 +76,7 @@ export function SessionCard({ session }: SessionCardProps) {
             </p>
           </div>
         </div>
-        
+
         <div className="flex items-center space-x-4">
           <div className="text-right text-sm text-gray-600">
             <p>{session.messageCount} meldinger</p>
@@ -91,7 +90,7 @@ export function SessionCard({ session }: SessionCardProps) {
               </div>
             )}
           </div>
-          
+
           <Link
             to="/doctor/session/$sessionId"
             params={{ sessionId: session.id.toString() }}

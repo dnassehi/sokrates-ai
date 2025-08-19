@@ -3,17 +3,18 @@ import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useTRPC } from "~/trpc/react";
 import { useAuthStore } from "~/stores/authStore";
-import { 
-  ArrowLeft, 
-  MessageCircle, 
-  User, 
-  Bot, 
-  Calendar, 
+import {
+  ArrowLeft,
+  MessageCircle,
+  User,
+  Bot,
+  Calendar,
   Star,
   FileText,
   Clock,
   CheckCircle
 } from "lucide-react";
+import Markdown from "markdown-to-jsx";
 
 export const Route = createFileRoute("/doctor/session/$sessionId/")({
   component: SessionDetailsPage,
@@ -44,8 +45,9 @@ function SessionDetailsPage() {
     )
   );
 
-  const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString("no-NO", {
+  const formatDate = (date: string | Date) => {
+    const dateObj = typeof date === 'string' ? new Date(date) : date;
+    return dateObj.toLocaleDateString("no-NO", {
       year: "numeric",
       month: "long",
       day: "numeric",
@@ -54,8 +56,9 @@ function SessionDetailsPage() {
     });
   };
 
-  const formatTime = (date: string) => {
-    return new Date(date).toLocaleTimeString("no-NO", {
+  const formatTime = (date: string | Date) => {
+    const dateObj = typeof date === 'string' ? new Date(date) : date;
+    return dateObj.toLocaleTimeString("no-NO", {
       hour: "2-digit",
       minute: "2-digit",
     });
@@ -123,8 +126,8 @@ function SessionDetailsPage() {
               </div>
             </div>
             <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
-              session.status === "completed" 
-                ? "bg-green-100 text-green-800" 
+              session.status === "completed"
+                ? "bg-green-100 text-green-800"
                 : "bg-yellow-100 text-yellow-800"
             }`}>
               {session.status === "completed" ? (
@@ -172,7 +175,9 @@ function SessionDetailsPage() {
                             ? "bg-blue-500 text-white ml-6"
                             : "bg-gray-100 text-gray-900 mr-6"
                         }`}>
-                          <p className="whitespace-pre-wrap text-sm">{message.content}</p>
+                          <div className="prose prose-sm max-w-none text-sm">
+                            <Markdown>{message.content}</Markdown>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -196,39 +201,57 @@ function SessionDetailsPage() {
                 <div className="p-6 space-y-4">
                   <div>
                     <h4 className="text-sm font-medium text-gray-900 mb-1">Hovedplage</h4>
-                    <p className="text-sm text-gray-600">{session.anamnesis.hovedplage}</p>
+                    <div className="text-sm text-gray-600 prose prose-sm max-w-none">
+                      <Markdown>{session.anamnesis.hovedplage}</Markdown>
+                    </div>
                   </div>
                   <div>
                     <h4 className="text-sm font-medium text-gray-900 mb-1">Tidligere sykdommer</h4>
-                    <p className="text-sm text-gray-600">{session.anamnesis.tidligereSykdommer}</p>
+                    <div className="text-sm text-gray-600 prose prose-sm max-w-none">
+                      <Markdown>{session.anamnesis.tidligereSykdommer}</Markdown>
+                    </div>
                   </div>
                   <div>
                     <h4 className="text-sm font-medium text-gray-900 mb-1">Medisinering</h4>
-                    <p className="text-sm text-gray-600">{session.anamnesis.medisinering}</p>
+                    <div className="text-sm text-gray-600 prose prose-sm max-w-none">
+                      <Markdown>{session.anamnesis.medisinering}</Markdown>
+                    </div>
                   </div>
                   <div>
                     <h4 className="text-sm font-medium text-gray-900 mb-1">Allergier</h4>
-                    <p className="text-sm text-gray-600">{session.anamnesis.allergier}</p>
+                    <div className="text-sm text-gray-600 prose prose-sm max-w-none">
+                      <Markdown>{session.anamnesis.allergier}</Markdown>
+                    </div>
                   </div>
                   <div>
                     <h4 className="text-sm font-medium text-gray-900 mb-1">Familiehistorie</h4>
-                    <p className="text-sm text-gray-600">{session.anamnesis.familiehistorie}</p>
+                    <div className="text-sm text-gray-600 prose prose-sm max-w-none">
+                      <Markdown>{session.anamnesis.familiehistorie}</Markdown>
+                    </div>
                   </div>
                   <div>
                     <h4 className="text-sm font-medium text-gray-900 mb-1">Sosial livsstil</h4>
-                    <p className="text-sm text-gray-600">{session.anamnesis.sosialLivsstil}</p>
+                    <div className="text-sm text-gray-600 prose prose-sm max-w-none">
+                      <Markdown>{session.anamnesis.sosialLivsstil}</Markdown>
+                    </div>
                   </div>
                   <div>
                     <h4 className="text-sm font-medium text-gray-900 mb-1">ROS (Review of Systems)</h4>
-                    <p className="text-sm text-gray-600">{session.anamnesis.ros}</p>
+                    <div className="text-sm text-gray-600 prose prose-sm max-w-none">
+                      <Markdown>{session.anamnesis.ros}</Markdown>
+                    </div>
                   </div>
                   <div>
                     <h4 className="text-sm font-medium text-gray-900 mb-1">Pasientmål</h4>
-                    <p className="text-sm text-gray-600">{session.anamnesis.pasientMaal}</p>
+                    <div className="text-sm text-gray-600 prose prose-sm max-w-none">
+                      <Markdown>{session.anamnesis.pasientMaal}</Markdown>
+                    </div>
                   </div>
                   <div>
                     <h4 className="text-sm font-medium text-gray-900 mb-1">Fri oppsummering</h4>
-                    <p className="text-sm text-gray-600">{session.anamnesis.friOppsummering}</p>
+                    <div className="text-sm text-gray-600 prose prose-sm max-w-none">
+                      <Markdown>{session.anamnesis.friOppsummering}</Markdown>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -264,7 +287,9 @@ function SessionDetailsPage() {
                   {session.rating.comment && (
                     <div>
                       <h4 className="text-sm font-medium text-gray-900 mb-1">Kommentar</h4>
-                      <p className="text-sm text-gray-600">{session.rating.comment}</p>
+                      <div className="text-sm text-gray-600 prose prose-sm max-w-none">
+                        <Markdown>{session.rating.comment}</Markdown>
+                      </div>
                     </div>
                   )}
                 </div>

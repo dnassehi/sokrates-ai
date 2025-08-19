@@ -118,39 +118,27 @@ export const completeChatSession = baseProcedure
     );
     let response;
     try {
-      response = await openai.chat.completions.create({
-        model: env.ANAMNESIS_MODEL,
+      response = await mistral.chat.complete({
+        model: env.MISTRAL_MODEL,
         messages: [
-        {
-          role: "system",
-          content: "Du er en medisinsk assistent som ekstraherer og strukturerer medisinsk informasjon fra samtaler. Returner alltid svaret som et gyldig JSON-objekt."
-        },
         {
           role: "user",
           content: `Basert på følgende samtale mellom Sokrates AI-assistent og en pasient, ekstrahér og strukturer den medisinske informasjonen i de oppgitte kategoriene. Hvis informasjon mangler i en kategori, skriv "Ikke oppgitt" eller "Ingen spesifikk informasjon gitt".\n\nSamtale:\n${conversationText}\n\nReturner svaret som et JSON-objekt med følgende struktur:\n{\n  "hovedplage": "string",\n  "tidligereSykdommer": "string",\n  "medisinering": "string",\n  "allergier": "string",\n  "familiehistorie": "string",\n  "sosialLivsstil": "string",\n  "ros": "string",\n  "pasientMaal": "string",\n  "friOppsummering": "string"\n}`
         }
       ],
-      response_format: {
-        type: 'json_schema',
-        json_schema: {
-          name: 'anamnesis',
-          schema: anamnesisJsonSchema,
-        },
-      },
+        maxTokens: 600,
+        responseFormat: { type: "json_object" },
+        temperature: 0.3,
     });
     } catch (error) {
-      console.error("Error calling OpenAI:", error);
+      console.error("Error calling Mistral:", error);
+      console.error("Error details:", JSON.stringify(error, null, 2));
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
         message: "Failed to generate anamnesis",
       });
     }
-    console.log(
-      "OpenAI anamnesis response:",
-      truncate(response.choices[0]?.message?.content ?? "")
-    );
-
-    const responseContent = response.choices[0]?.message?.content;
+        const responseContent = response.choices[0]?.message?.content;
     if (!responseContent) {
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
@@ -158,15 +146,63 @@ export const completeChatSession = baseProcedure
       });
     }
 
+    // Handle both string and ContentChunk[] types
+    const responseText = typeof responseContent === 'string'
+      ? responseContent
+      : responseContent.map(chunk => chunk.type === 'text' ? chunk.text : '').join('');
+
+    console.log(
+      "Mistral anamnesis response:",
+      truncate(responseText)
+    );
+
     let object;
     try {
-      object = JSON.parse(responseContent);
-      // Validate the parsed object against our Zod schema
+      // Try to parse as JSON first
+      object = JSON.parse(responseText);
+    } catch (error) {
+      console.log("Failed to parse as JSON, trying manual extraction...");
+
+      // Manual parsing of the response
+      const extractField = (text: string, fieldName: string): string => {
+        const patterns = [
+          new RegExp(`"${fieldName}":\\s*"([^"]*)"`, 'i'),
+          new RegExp(`${fieldName}:\\s*"([^"]*)"`, 'i'),
+          new RegExp(`${fieldName}:\\s*([^\\n,}]+)`, 'i'),
+        ];
+
+        for (const pattern of patterns) {
+          const match = text.match(pattern);
+          if (match && match[1]) {
+            return match[1].trim();
+          }
+        }
+        return "Ikke oppgitt";
+      };
+
+      object = {
+        hovedplage: extractField(responseText, "hovedplage"),
+        tidligereSykdommer: extractField(responseText, "tidligereSykdommer"),
+        medisinering: extractField(responseText, "medisinering"),
+        allergier: extractField(responseText, "allergier"),
+        familiehistorie: extractField(responseText, "familiehistorie"),
+        sosialLivsstil: extractField(responseText, "sosialLivsstil"),
+        ros: extractField(responseText, "ros"),
+        pasientMaal: extractField(responseText, "pasientMaal"),
+        friOppsummering: extractField(responseText, "friOppsummering"),
+      };
+
+      console.log("Manually extracted object:", object);
+    }
+
+    // Validate the parsed object against our Zod schema
+    try {
       object = anamnesisSchema.parse(object);
     } catch (error) {
+      console.error("Validation error:", error);
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
-        message: "Failed to parse anamnesis response",
+        message: "Failed to validate anamnesis response",
       });
     }
 

@@ -33,6 +33,7 @@
     "dotenv": "^17.2.1",
     "jsonwebtoken": "^9.0.2",
     "lucide-react": "^0.525.0",
+    "markdown-to-jsx": "^7.7.13",
     "minio": "^8.0.5",
     "openai": "^5.10.2",
     "postcss": "^8.5.1",
@@ -51,6 +52,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.25.1",
+    "@tailwindcss/typography": "^0.5.16",
     "@tanstack/eslint-plugin-router": "^1.115.0",
     "@types/bcryptjs": "^3.0.0",
     "@types/jsonwebtoken": "^9.0.10",
