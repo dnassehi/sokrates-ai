@@ -9,9 +9,8 @@ const envSchema = z.object({
   BASE_URL: z.string().optional(),
   BASE_URL_OTHER_PORT: z.string().optional(),
   ADMIN_PASSWORD: z.string(),
-  OPENAI_API_KEY: z.string(),
-  ASSISTANT_ID: z.string(),
-  ANAMNESIS_MODEL: z.string(),
+  MISTRAL_API_KEY: z.string(),
+  MISTRAL_MODEL: z.string(),
   JWT_SECRET: z.string(),
 });
 
