@@ -9,6 +9,7 @@ Sokrates AI er en intelligent samtaleassistent som hjelper pasienter med å fyll
 - **Sokratisk dialog**: AI-assistenten stiller gjennomtenkte spørsmål for å samle medisinsk informasjon
 - **Naturlig samtale**: Fylle ut anamnese gjennom en naturlig dialog i stedet for et tradisjonelt skjema
 - **Vurderingssystem**: Mulighet til å gi tilbakemelding på opplevelsen
+- **Markdown-formatering**: AI-svar vises med riktig formatering (fet, kursiv, lister, etc.)
 
 ### For Leger
 - **Dashboard**: Oversikt over alle pasientsesjoner fra din klinikk
@@ -16,15 +17,17 @@ Sokrates AI er en intelligent samtaleassistent som hjelper pasienter med å fyll
 - **Komplett samtalehistorikk**: Se hele samtalen mellom pasient og AI
 - **Pasientvurderinger**: Se tilbakemeldinger fra pasienter
 - **Filtering og søk**: Filtrer sesjoner etter status og andre kriterier
+- **Formatert visning**: Anamnese og kommentarer vises med markdown-formatering
 
 ## 🏗️ Teknologi-stack
 
 - **Frontend**: React med TanStack Router
 - **Backend**: tRPC for type-safe API
 - **Database**: PostgreSQL med Prisma ORM
-- **AI**: OpenAI GPT-4o via Vercel AI SDK
+- **AI**: Mistral AI med streaming og JSON-format støtte
 - **Autentisering**: JWT tokens med bcrypt for passordhashing
-- **Styling**: Tailwind CSS
+- **Styling**: Tailwind CSS med Typography plugin
+- **Markdown-rendering**: markdown-to-jsx for AI-svar og anamnese
 - **State Management**: Zustand med persistence
 - **Forms**: React Hook Form med Zod validation
 
@@ -116,6 +119,61 @@ Applikasjonen oppretter automatisk en demo-lege-konto:
 2. **Dashboard**: Se oversikt over alle sesjoner fra din klinikk
 3. **Se detaljer**: Klikk på en sesjon for å se komplett samtale og anamnese
 4. **Filtrer**: Bruk filtrene for å finne spesifikke sesjoner
+
+## 🎨 Markdown-rendering
+
+Systemet støtter markdown-formatering i alle AI-svar og anamnese-felter for bedre lesbarhet:
+
+### Støttet formatering
+- **Fet tekst**: `**tekst**` → **tekst**
+- **Kursiv tekst**: `*tekst*` → *tekst*
+- **Overskrifter**: `# Overskrift` → `<h1>`
+- **Lister**: `- punkt` → `<ul><li>`
+- **Kode**: `` `kode` `` → `<code>`
+- **Lenker**: `[tekst](url)` → `<a>`
+
+### Implementasjon
+- **Frontend**: `markdown-to-jsx` for å konvertere markdown til React-komponenter
+- **Styling**: `@tailwindcss/typography` for konsistent typografi
+- **Komponenter**: Chat-meldinger og anamnese-felter rendres automatisk med markdown-støtte
+
+### Streaming og JSON-format
+- **Chat-streaming**: Bruker Mistral AI streaming API for bedre ytelse
+- **JSON-anamnese**: Automatisk strukturert output med `responseFormat: { type: "json_object" }`
+- **Sikkerhet**: Ingen data lagres hos Mistral AI
+- **Real-time**: Brukere ser svaret bygges opp gradvis
+
+### AI-assistent system-prompt
+Systemet bruker en spesifikk prompt for å fungere som en profesjonell medisinsk sekretær:
+
+```
+Du er en profesjonell medisinsk sekretær som jobber for en allmennlege. Din rolle er å være en digital assistent som samler inn nødvendig informasjon fra pasienten før konsultasjonen starter.
+
+**Ditt oppdrag:**
+- Forklar at du vil stille noen oppfølgningsspørsmål og be pasienten svare på de så godt vedkommende klarer.
+- Be om informert samtykke. Forklar pasienten at interaksjonen blir lagret anonymt.
+- Still maks 1–2 spørsmål om gangen, og vent på svar før du går videre.
+- Bruk en varm og profesjonell tone.
+- Still relevante spørsmål om:
+  - Symptomer
+  - Når symptomene startet
+  - Alvorlighetsgrad
+  - Tidligere behandling
+  - Nåværende medisiner
+- Bruk gjerne oppfølgingsspørsmål for å få fram detaljer.
+- Når du er ferdig, spør alltid: «Er det noe mer du ønsker å dele om din helse?»
+- Hvis pasienten sier nei eller ikke svarer, lag et kort og konsist notat til legen som oppsummerer situasjonen.
+- Minn pasienten på å trykke på den grønne «fullfør»-knappen øverst til høyre når samtalen er ferdig.
+- Det er meget viktig at du ikke forsøker å stille diagnoser men overlater refleksjoner rundt dette til legen.
+
+**Eksempelstart:**
+"Jeg stiller deg noen flere spørsmål slik at vi kan sikre at all informasjon blir tatt opp. Husk å trykke på den grønne «fullfør»-knappen øverst til høyre."
+
+**Stil og format:**
+- Svarene skal være i dialogformat.
+- Bruk fortrinnsvis norsk språk.
+- Oppsummering til legen skal være objektiv og kortfattet.
+```
 
 ## 🗄️ Database-struktur
 

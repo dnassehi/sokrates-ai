@@ -2,6 +2,18 @@
 
 Dette dokumentet forklarer hvordan Mistral AI Agent API er integrert i Sokrates AI-prosjektet. Det gir veiledning for utviklere og AI-agenter som skal forstå, videreutvikle eller jobbe med systemet.
 
+### 🎨 Markdown-rendering
+
+Systemet støtter markdown-formatering i alle AI-svar og anamnese-felter:
+- **Fet tekst**: `**tekst**` → **tekst**
+- **Kursiv tekst**: `*tekst*` → *tekst*
+- **Overskrifter**: `# Overskrift` → `<h1>`
+- **Lister**: `- punkt` → `<ul><li>`
+- **Kode**: `` `kode` `` → `<code>`
+- **Lenker**: `[tekst](url)` → `<a>`
+
+Markdown-rendering er implementert med `markdown-to-jsx` og `@tailwindcss/typography` for konsistent styling.
+
 ---
 
 ## 📌 Formål
@@ -18,7 +30,6 @@ Alle API-nøkler defineres i `.env` (ikke versjonskontrollér sensitive data):
 
 ```env
 MISTRAL_API_KEY="your_mistral_api_key_here"
-MISTRAL_AGENT_ID="ag_your_mistral_agent_id_here"
 MISTRAL_MODEL="mistral-large-latest"
 JWT_SECRET="..."
 
@@ -28,15 +39,31 @@ JWT_SECRET="..."
 # ANAMNESIS_MODEL="gpt-4o"
 ```
 
-### 🧠 Brukt API: Mistral AI Agent API
+### 🧠 Brukt API: Mistral AI Chat Completions API
 
-- **Modell**: mistral-large-latest (for anamnese-generering)
-- **Agent ID**: Definert i `.env`
-- **Arbeidsflyt**: Stateless chat-komplettering
+- **Chat-forespørsler**: `mistral.chat.stream()` med system-prompt (streaming)
+- **Anamnese-generering**: `mistral.chat.complete()` med JSON-format
+- **Arbeidsflyt**:
   1. Hent alle meldinger fra database
   2. Bygg meldingshistorikk
-  3. Kall `mistral.agents.complete()` med full historikk
-  4. Lagre assistentens svar i database
+  3. Kall `mistral.chat.stream()` for chat (streaming + system-prompt)
+  4. Kall `mistral.chat.complete()` med `responseFormat: { type: "json_object" }` for anamnese
+  5. Lagre assistentens svar i database
+
+### 🎨 Frontend-rendering
+
+- **Markdown-parsing**: `markdown-to-jsx` for å konvertere markdown til React-komponenter
+- **Styling**: `@tailwindcss/typography` for konsistent typografi
+- **Komponenter**: Chat-meldinger og anamnese-felter rendres med markdown-støtte
+- **Responsivt**: Automatisk tilpasning til ulike skjermstørrelser
+
+### 🚀 Streaming og JSON-format
+
+- **Chat-streaming**: Bruker `mistral.chat.stream()` med system-prompt for bedre sikkerhet
+- **JSON-anamnese**: Bruker `responseFormat: { type: "json_object" }` for strukturert output
+- **Ingen data-lagring**: Streaming betyr at data ikke lagres hos Mistral
+- **Real-time respons**: Brukere ser svaret bygges opp gradvis
+- **System-prompt**: Medisinsk sekretær-rolle med spesifikke instruksjoner
 
 ---
 
@@ -67,11 +94,12 @@ Mistral AI-agenten genererer strukturert JSON:
 | `src/server/trpc/procedures/sendChatMessage.ts` | Kaller Mistral AI Agent API |
 | `src/server/trpc/procedures/completeChatSession.ts` | Genererer strukturert anamnese fra samtale via Mistral |
 | `src/routes/chat/index.tsx` | Chat-UI for pasienter |
+| `src/components/ChatMessage.tsx` | Chat-melding komponent med markdown-rendering |
 | `src/server/db.ts` | Prisma-databaseklient |
 | `src/server/trpc/procedures/createChatSession.ts` | Håndterer sesjonsopprettelse |
 | `src/server/trpc/procedures/submitRating.ts` | Lagrer pasientens tilbakemeldinger |
 | `src/routes/doctor/dashboard/index.tsx` | Lege-dashboard |
-| `src/routes/doctor/session/$sessionId/index.tsx` | Sesjonsdetaljer for leger |
+| `src/routes/doctor/session/$sessionId/index.tsx` | Sesjonsdetaljer for leger med markdown-rendering |
 
 ---
 
@@ -137,61 +165,53 @@ curl -X POST http://localhost:8000/api/trpc/sendChatMessage \
 
 ## 🧩 Eksempel på API-kall
 
-### Send chat-melding:
+### Send chat-melding (streaming):
 ```typescript
-// Opprett eller bruk eksisterende thread
-let threadId = session.openaiThreadId;
-if (!threadId) {
-  const thread = await openai.beta.threads.create();
-  threadId = thread.id;
-}
+// Bygg meldingshistorikk
+const messageList = allMessages.map(msg => ({
+  role: msg.role as "user" | "assistant",
+  content: msg.content,
+}));
 
-// Send melding
-await openai.beta.threads.messages.create(threadId, {
-  role: "user",
-  content: message,
-});
-
-// Start assistant run
-const run = await openai.beta.threads.runs.create(threadId, {
-  assistant_id: env.ASSISTANT_ID,
-});
-
-// Poll for completion
-let runStatus = await openai.beta.threads.runs.retrieve(run.id, {
-  thread_id: threadId
-});
-
-while (runStatus.status === "in_progress" || runStatus.status === "queued") {
-  await new Promise(resolve => setTimeout(resolve, 1000));
-  runStatus = await openai.beta.threads.runs.retrieve(run.id, {
-    thread_id: threadId
-  });
-}
-
-// Hent svar
-const messages = await openai.beta.threads.messages.list(threadId);
-const assistantMessage = messages.data.find(msg =>
-  msg.role === "assistant" && msg.run_id === run.id
-);
-```
-
-### Generer anamnese:
-```typescript
-const response = await openai.chat.completions.create({
-  model: env.ANAMNESIS_MODEL,
+// Send melding med streaming og system-prompt
+const stream = await mistral.chat.stream({
+  model: env.MISTRAL_MODEL,
   messages: [
     {
       role: "system",
-      content: "Generer strukturert anamnese basert på samtalen"
+      content: "Du er en profesjonell medisinsk sekretær..."
     },
+    ...messageList
+  ],
+  maxTokens: 400,
+  temperature: 0.7,
+});
+
+// Hent streaming-respons
+let assistantResponse = '';
+for await (const event of stream) {
+  if (event.data.choices?.[0]?.delta?.content) {
+    assistantResponse += event.data.choices[0].delta.content;
+  }
+}
+```
+
+### Generer anamnese (JSON-format):
+```typescript
+const response = await mistral.chat.complete({
+  model: env.MISTRAL_MODEL,
+  messages: [
     {
       role: "user",
-      content: conversationHistory
+      content: `Basert på følgende samtale, ekstrahér medisinsk informasjon...\n\nSamtale:\n${conversationText}`
     }
   ],
-  response_format: { type: "json_object" }
+  maxTokens: 600,
+  responseFormat: { type: "json_object" },
+  temperature: 0.3,
 });
+
+const anamnesis = JSON.parse(response.choices[0].message.content);
 ```
 
 ---

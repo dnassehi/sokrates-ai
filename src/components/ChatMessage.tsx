@@ -1,4 +1,5 @@
 import type { ChatMessage } from "~/routes/chat/index";
+import Markdown from "markdown-to-jsx";
 
 interface ChatMessageProps {
   message: ChatMessage;
@@ -20,7 +21,9 @@ export function ChatMessage({ message }: ChatMessageProps) {
             : "bg-white shadow-sm border text-gray-900"
         }`}
       >
-        <p className="whitespace-pre-wrap">{message.content}</p>
+        <div className="prose prose-sm max-w-none">
+          <Markdown>{message.content}</Markdown>
+        </div>
         <p className={`text-xs mt-2 ${
           message.role === "user" ? "text-blue-100" : "text-gray-600"
         }`}>

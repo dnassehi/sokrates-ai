@@ -1,7 +1,13 @@
 import { Users, Clock, CheckCircle } from "lucide-react";
 
 interface Session {
-  status: "active" | "completed";
+  id: number;
+  status: string;
+  createdAt: Date;
+  completedAt: Date | null;
+  messageCount: number;
+  hasAnamnesis: boolean;
+  rating: { score: number; comment: string | null; } | null;
 }
 
 interface DashboardStatsProps {
@@ -24,7 +30,7 @@ export function DashboardStats({ sessions }: DashboardStatsProps) {
           </div>
         </div>
       </div>
-      
+
       <div className="bg-white rounded-lg shadow p-6">
         <div className="flex items-center">
           <Clock className="w-8 h-8 text-yellow-500" />
@@ -34,7 +40,7 @@ export function DashboardStats({ sessions }: DashboardStatsProps) {
           </div>
         </div>
       </div>
-      
+
       <div className="bg-white rounded-lg shadow p-6">
         <div className="flex items-center">
           <CheckCircle className="w-8 h-8 text-green-500" />
