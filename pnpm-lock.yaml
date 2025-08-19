@@ -17,6 +17,9 @@ importers:
       '@hookform/resolvers':
         specifier: ^5.1.1
         version: 5.1.1(react-hook-form@7.58.1(react@19.1.0))
+      '@mistralai/mistralai':
+        specifier: ^1.9.17
+        version: 1.9.17(zod@3.25.67)
       '@prisma/client':
         specifier: ^6.8.2
         version: 6.8.2(prisma@6.7.0(typescript@5.8.3))(typescript@5.8.3)
@@ -1041,6 +1044,11 @@ packages:
     resolution: {integrity: sha512-llMXd39jtP0HpQLVI37Bf1m2ADlEb35GYSh1SDSLsBhR+5iCxiNGlT31yqbNtVHygHAtMy6dWFERpU2JgufhPg==}
     engines: {node: '>=18'}
     hasBin: true
+
+  '@mistralai/mistralai@1.9.17':
+    resolution: {integrity: sha512-w05SAcOYWevFzMo/A8/xPxQg4wmyVMMRgcs+rAQb/jjWFSrC4NrXIslxHSKe4Jis1WgB+eIJa7LYGuRn9e6ZnA==}
+    peerDependencies:
+      zod: '>= 3'
 
   '@modelcontextprotocol/sdk@1.11.0':
     resolution: {integrity: sha512-k/1pb70eD638anoi0e8wUGAlbMJXyvdV4p62Ko+EZ7eBe1xMx8Uhak1R5DgfoofsK5IBBnRwsYGTaLZl+6/+RQ==}
@@ -6067,6 +6075,11 @@ snapshots:
     transitivePeerDependencies:
       - encoding
       - supports-color
+
+  '@mistralai/mistralai@1.9.17(zod@3.25.67)':
+    dependencies:
+      zod: 3.25.67
+      zod-to-json-schema: 3.24.5(zod@3.25.67)
 
   '@modelcontextprotocol/sdk@1.11.0':
     dependencies:

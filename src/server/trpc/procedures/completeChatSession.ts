@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
-import OpenAI from "openai";
+import { Mistral } from "@mistralai/mistralai";
 import { db } from "~/server/db";
 import { baseProcedure } from "~/server/trpc/main";
 import { env } from "~/server/env";
@@ -8,8 +8,8 @@ import { env } from "~/server/env";
 const truncate = (str: string, len = 100) =>
   str.length > len ? `${str.slice(0, len)}…` : str;
 
-const openai = new OpenAI({
-  apiKey: env.OPENAI_API_KEY,
+const mistral = new Mistral({
+  apiKey: env.MISTRAL_API_KEY,
 });
 
 const anamnesisSchema = z.object({
