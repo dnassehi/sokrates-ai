@@ -1,12 +1,12 @@
-# 🧠 Sokrates AI – Mistral AI Agent Integrasjon
+# 🧠 Sokrates AI – OpenAI Assistant API Integrasjon
 
-Dette dokumentet forklarer hvordan Mistral AI Agent API er integrert i Sokrates AI-prosjektet. Det gir veiledning for utviklere og AI-agenter som skal forstå, videreutvikle eller jobbe med systemet.
+Dette dokumentet forklarer hvordan OpenAI Assistant API er integrert i Sokrates AI-prosjektet. Det gir veiledning for utviklere og AI-agenter som skal forstå, videreutvikle eller jobbe med systemet.
 
 ---
 
 ## 📌 Formål
 
-Mistral AI Agent API brukes for å lede pasienten gjennom en sokratisk samtale og samle inn strukturert medisinsk anamnesedata. Samtalene mellom pasienten og assistenten genererer et JSON-objekt som kan vurderes av legen.
+OpenAI Assistant API brukes for å lede pasienten gjennom en sokratisk samtale og samle inn strukturert medisinsk anamnesedata. Samtalene mellom pasienten og assistenten genererer et JSON-objekt som kan vurderes av legen.
 
 ---
 
@@ -17,32 +17,28 @@ Mistral AI Agent API brukes for å lede pasienten gjennom en sokratisk samtale o
 Alle API-nøkler defineres i `.env` (ikke versjonskontrollér sensitive data):
 
 ```env
-MISTRAL_API_KEY="your_mistral_api_key_here"
-MISTRAL_AGENT_ID="ag_your_mistral_agent_id_here"
-MISTRAL_MODEL="mistral-large-latest"
+OPENAI_API_KEY="sk-..."
+ASSISTANT_ID="asst_..."
+ANAMNESIS_MODEL="gpt-4o"
 JWT_SECRET="..."
-
-# Legacy OpenAI configuration (deprecated)
-# OPENAI_API_KEY="sk-..."
-# ASSISTANT_ID="asst_..."
-# ANAMNESIS_MODEL="gpt-4o"
 ```
 
-### 🧠 Brukt API: Mistral AI Agent API
+### 🧠 Brukt API: OpenAI Assistants API
 
-- **Modell**: mistral-large-latest (for anamnese-generering)
-- **Agent ID**: Definert i `.env`
-- **Arbeidsflyt**: Stateless chat-komplettering
-  1. Hent alle meldinger fra database
-  2. Bygg meldingshistorikk
-  3. Kall `mistral.agents.complete()` med full historikk
-  4. Lagre assistentens svar i database
+- **Modell**: GPT-4o (for anamnese-generering)
+- **Assistant ID**: Definert i `.env`
+- **Arbeidsflyt**: `openai.beta.threads.*` API
+  1. `threads.create()` – opprett ny tråd
+  2. `threads.messages.create()` – send brukermelding
+  3. `threads.runs.create()` – start run med assistant
+  4. `threads.runs.retrieve()` – poll fremdrift
+  5. `threads.messages.list()` – hent svar
 
 ---
 
 ## 🧾 JSON-schema (Anamnese-svar)
 
-Mistral AI-agenten genererer strukturert JSON:
+OpenAI-assistenten genererer strukturert JSON:
 
 ```json
 {
@@ -64,8 +60,8 @@ Mistral AI-agenten genererer strukturert JSON:
 
 | Fil | Formål |
 |-----|--------|
-| `src/server/trpc/procedures/sendChatMessage.ts` | Kaller Mistral AI Agent API |
-| `src/server/trpc/procedures/completeChatSession.ts` | Genererer strukturert anamnese fra samtale via Mistral |
+| `src/server/trpc/procedures/sendChatMessage.ts` | Kaller OpenAI Assistant API med polling |
+| `src/server/trpc/procedures/completeChatSession.ts` | Genererer strukturert anamnese fra samtale |
 | `src/routes/chat/index.tsx` | Chat-UI for pasienter |
 | `src/server/db.ts` | Prisma-databaseklient |
 | `src/server/trpc/procedures/createChatSession.ts` | Håndterer sesjonsopprettelse |
@@ -83,9 +79,9 @@ Mistral AI-agenten genererer strukturert JSON:
 
 ---
 
-## 📑 Mistral AI-brukspolicy
+## 📑 OpenAI-brukspolicy
 
-- Alle Mistral AI-kall skjer server-side slik at API-nøkkelen ikke eksponeres
+- Alle OpenAI-kall skjer server-side slik at API-nøkkelen ikke eksponeres
 - Nøklene lagres kun i miljøvariabler og skrives ikke til databasen
 - Forespørsler inkluderer anonym sesjons-ID for tracking
 - Se https://openai.com/policies/usage-policies for mer informasjon
