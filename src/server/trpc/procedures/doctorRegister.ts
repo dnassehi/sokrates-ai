@@ -11,15 +11,27 @@ export const doctorRegister = baseProcedure
     clinicCode: z.string().min(1),
   }))
   .mutation(async ({ input }) => {
-    // Check if doctor already exists
-    const existingDoctor = await db.doctor.findUnique({
+    // Check if doctor with this email already exists
+    const existingDoctorByEmail = await db.doctor.findUnique({
       where: { email: input.email },
     });
 
-    if (existingDoctor) {
+    if (existingDoctorByEmail) {
       throw new TRPCError({
         code: "CONFLICT",
-        message: "Doctor with this email already exists",
+        message: "En lege med denne e-postadressen eksisterer allerede",
+      });
+    }
+
+    // Check if doctor with this clinic code already exists
+    const existingDoctorByClinicCode = await db.doctor.findUnique({
+      where: { clinicCode: input.clinicCode },
+    });
+
+    if (existingDoctorByClinicCode) {
+      throw new TRPCError({
+        code: "CONFLICT",
+        message: "En lege med denne klinikkoden eksisterer allerede",
       });
     }
 
