@@ -72,7 +72,7 @@ function DoctorRegisterPage() {
                 <input
                   id="email"
                   type="email"
-                  {...register("email", { 
+                  {...register("email", {
                     required: "E-post er påkrevd",
                     pattern: {
                       value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
@@ -97,7 +97,7 @@ function DoctorRegisterPage() {
                 <input
                   id="clinicCode"
                   type="text"
-                  {...register("clinicCode", { 
+                  {...register("clinicCode", {
                     required: "Klinikkode er påkrevd",
                     minLength: {
                       value: 2,
@@ -112,7 +112,7 @@ function DoctorRegisterPage() {
                 <p className="mt-1 text-sm text-red-600">{errors.clinicCode.message}</p>
               )}
               <p className="mt-1 text-xs text-gray-500">
-                Klinikkoden brukes for å gruppere pasienter til din klinikk
+                Klinikkoden brukes for å gruppere pasienter til din klinikk. Hver klinikkode må være unik.
               </p>
             </div>
 
@@ -125,7 +125,7 @@ function DoctorRegisterPage() {
                 <input
                   id="password"
                   type="password"
-                  {...register("password", { 
+                  {...register("password", {
                     required: "Passord er påkrevd",
                     minLength: {
                       value: 6,
@@ -150,7 +150,7 @@ function DoctorRegisterPage() {
                 <input
                   id="confirmPassword"
                   type="password"
-                  {...register("confirmPassword", { 
+                  {...register("confirmPassword", {
                     required: "Bekreft passord er påkrevd",
                     validate: value => value === password || "Passordene stemmer ikke overens"
                   })}
@@ -174,7 +174,7 @@ function DoctorRegisterPage() {
             {registerMutation.isError && (
               <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
                 <p className="text-red-700 text-sm">
-                  Det oppstod en feil ved registrering. E-posten kan allerede være i bruk.
+                  {registerMutation.error?.message || "Det oppstod en feil ved registrering. E-posten eller klinikkoden kan allerede være i bruk."}
                 </p>
               </div>
             )}
