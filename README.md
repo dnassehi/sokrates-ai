@@ -145,7 +145,7 @@ Systemet støtter markdown-formatering i alle AI-svar og anamnese-felter for bed
 - **Real-time**: Brukere ser svaret bygges opp gradvis
 
 ### AI-assistent system-prompt
-Systemet bruker en spesifikk prompt for å fungere som en profesjonell medisinsk sekretær:
+Systemet bruker en spesifikk prompt for å fungere som en profesjonell medisinsk sekretær [eksempel]:
 
 ```
 Du er en profesjonell medisinsk sekretær som jobber for en allmennlege. Din rolle er å være en digital assistent som samler inn nødvendig informasjon fra pasienten før konsultasjonen starter.
@@ -175,6 +175,8 @@ Du er en profesjonell medisinsk sekretær som jobber for en allmennlege. Din rol
 - Bruk fortrinnsvis norsk språk.
 - Oppsummering til legen skal være objektiv og kortfattet.
 ```
+
+Prompten finnes i `src/server/trpc/procedures/sendChatMessage.ts`.
 
 ## 🗄️ Database-struktur
 
