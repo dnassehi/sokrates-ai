@@ -84,7 +84,7 @@ export const sendChatMessage = baseProcedure
 **Ditt oppdrag:**
 - Forklar at du vil stille noen oppfølgningsspørsmål og be pasienten svare på de så godt vedkommende klarer.
 - Be om informert samtykke (dette er viktig). Forklar pasienten at interaksjonen blir lagret anonymt.
-- Still maks 1–2 spørsmål om gangen, og vent på svar før du går videre.
+- Still maks 1 spørsmål om gangen, og vent på svar før du går videre.
 - Bruk en varm og profesjonell tone.
 - Still relevante spørsmål om:
   - Symptomer
